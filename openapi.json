@@ -1,0 +1,385 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ChatEdu Search Api Documentation",
+    "description": "This is the API documentation for the ChatEdu search website.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://semantic.education.nsw.gov.au/"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "get": {
+        "operationId": "Login",
+        "summary": "API to retrieve the login url",
+        "description": "This API is used to get a login url to let the user login and acquire a token",
+        "responses": {
+          "200": {
+            "description": "Returns the login url",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authResponse": {
+                      "type": "string",
+                      "description": "Contains the login url to let the user authenticate"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/results": {
+      "get": {
+        "summary": "Get documents from a search query",
+        "description": "Gets results based on a search term. This same API can be use to paginate",
+        "operationId": "getDocuments",
+        "parameters": [
+          {
+            "name": "access_token",
+            "in": "cookie",
+            "description": "The token acquired after logging in using SSO",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "description": "query denoting the user's search term. This query param needs to be used by itself. The response from this API will return the results together with a uniqueID to be used when paginating through the results.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "Use this in conjunction with uniqueID query param only when paginating. When start is 11, it means that the user is starting from page 2 and the API will return the next 10 results i.e. From 11 till 21.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "uniqueID",
+            "in": "query",
+            "description": "Use this only when paginating"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful in retrieving documents by search term",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResult"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "This error occurs when the user is valid however hasn't been allowed access by the application administrator",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "description": "The url to push the user to"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Message explaining to the user why the operation failed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "This error occur when the user's token is invalid, there are no cookies or the cookies don't contain the \"access_token\" key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Message explaining to the user why the operation failed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "This error occurs in the rare occasion that the token is valid however, the user holding this token doesn't have enough permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Message explaining to the user why the operation failed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "This error occurs due to server failures",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Message explaining to the user why the operation failed"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/saveMetrics": {
+      "post": {
+        "operationId": "saveMetrics",
+        "summary": "Stores user metrics",
+        "description": "Stores the thumbs up/down, user feedback and document clicks",
+        "parameters": [
+          {
+            "name": "access_token",
+            "in": "cookie",
+            "description": "The token acquired after logging in using SSO",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful when saving the metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "A success message showing that the operation was successful"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "This error occurs when the user is valid however hasn't been allowed access by the application administrator",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "description": "The url to push the user to"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Message explaining to the user why the operation failed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "This error occur when the user's token is invalid, there are no cookies or the cookies don't contain the \"access_token\" key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Message explaining to the user why the operation failed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "This error occurs in the rare occasion that the token is valid however, the user holding this token doesn't have enough permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Message explaining to the user why the operation failed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "This error occurs due to server failures",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Message explaining to the user why the operation failed"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "The type of metric to save",
+                    "enum": [
+                      "chunk",
+                      "document_click",
+                      "user_feedback"
+                    ]
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "searchTerm": {
+                        "type": "string",
+                        "description": "This is the search query that the user input. This needs to be sent only when the type is \"chunk\" or \"document_click\""
+                      },
+                      "chunkId": {
+                        "type": "string",
+                        "description": "This is the Id of the DocumentChunk schema. This needs to be sent only when they type is \"chunk\""
+                      },
+                      "location": {
+                        "type": "string",
+                        "description": "This is the docURL property of the Document schema. This needs to be sent only when the type is either \"chunk\" or \"document_click\""
+                      },
+                      "rating": {
+                        "type": "integer",
+                        "description": "This property has 2 uses, rating a document chunk or rating the application. When the type is \"chunk\", send a 0 for thumbs down or a 1 for thumbs up. When the type is \"user_feedback\", send a value between 1 and 5 inclusive."
+                      },
+                      "feedback": {
+                        "type": "string",
+                        "description": "This property is the feedback message sent by a user. Send this property only when the type is \"user_feedback\""
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "petstore_auth": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "http://petstore.swagger.io/api/oauth/dialog"
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Chunk": {
+        "title": "Document Chunk",
+        "description": "A chunk that is part of a stored document",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "snippet": {
+            "type": "string"
+          }
+        }
+      },
+      "Document": {
+        "title": "Document",
+        "description": "Document returned as part of the search result",
+        "type": "object",
+        "properties": {
+          "docTitle": {
+            "type": "string"
+          },
+          "docURL": {
+            "type": "string"
+          },
+          "cat": {
+            "type": "string"
+          },
+          "docSnippets": {
+            "$ref": "#/components/schemas/Chunk"
+          }
+        }
+      },
+      "SearchResult": {
+        "title": "Search result",
+        "description": "Results from the search",
+        "type": "object",
+        "properties": {
+          "numberOfResults": {
+            "type": "integer"
+          },
+          "returnedDocs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Document"
+            }
+          },
+          "start": {
+            "type": "integer"
+          },
+          "uniqueId": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
